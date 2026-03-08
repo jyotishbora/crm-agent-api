@@ -42,32 +42,27 @@ CRITICAL RULES FOR QUERYING:
 Answer concisely based on actual CRM data."""
 
 
+DATAGOL_BASE = "https://mcp.datagol.ai"
+WORKSPACE_ID = "dd7f96b7-cbfa-4ad3-ba31-69700e95f54d"
+TOKEN = "d29e17e4e482c454b6ec76d56751ce335e40b31f108bab4aee77ce690e56aca6"
+
+MCP_SERVERS = {
+    "companies": "cf69d60f-6541-48fc-bb89-e38bd562804c",
+    "deals": "608863ed-6156-49f6-9023-d1d9bc3b93e1",
+    "fundraisers": "25643c72-b208-4e47-9058-730bcfe9225b",
+    "funds": "1b4a823f-4449-44f0-805c-0359f9ae7496",
+    "people": "d9be1b32-77ea-4771-89cd-9ff458b2bc34",
+    "tasks": "67595a35-eaa4-4f9a-89f2-03496bbee251",
+}
+
+
 def get_mcp_config():
     return {
-        "companies": {
+        name: {
             "transport": "streamable_http",
-            "url": os.getenv("MCP_COMPANIES_URL"),
-        },
-        "deals": {
-            "transport": "streamable_http",
-            "url": os.getenv("MCP_DEALS_URL"),
-        },
-        "fundraisers": {
-            "transport": "streamable_http",
-            "url": os.getenv("MCP_FUNDRAISERS_URL"),
-        },
-        "funds": {
-            "transport": "streamable_http",
-            "url": os.getenv("MCP_FUNDS_URL"),
-        },
-        "people": {
-            "transport": "streamable_http",
-            "url": os.getenv("MCP_PEOPLE_URL"),
-        },
-        "tasks": {
-            "transport": "streamable_http",
-            "url": os.getenv("MCP_TASKS_URL"),
-        },
+            "url": f"{DATAGOL_BASE}/{name}?workspace_id={WORKSPACE_ID}&workbook_id={workbook_id}&token={TOKEN}",
+        }
+        for name, workbook_id in MCP_SERVERS.items()
     }
 
 
