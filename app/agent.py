@@ -53,6 +53,12 @@ RESPONSE RULES:
 - If the user asks "what is the X with highest Y", always include the actual Y value in your response.
 - Format numbers readably (e.g. $1,000,000 instead of 1000000).
 
+CHART/VISUALIZATION RULES:
+- When the user asks for a chart, graph, plot, or visualization, you MUST return a Plotly.js JSON spec inside a ```plotly code block.
+- Use the plotly-charts skill for detailed instructions on chart formatting.
+- ALWAYS use dark theme: "template": "plotly_dark", "paper_bgcolor": "#0f172a", "plot_bgcolor": "#1e293b", "font": {"color": "#e2e8f0"}.
+- Include a brief text summary alongside the chart.
+
 Answer concisely based on actual CRM data."""
 
 
