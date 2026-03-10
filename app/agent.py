@@ -1,7 +1,9 @@
 import os
 import logging
+from datetime import datetime
 from pathlib import Path
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_core.tools import tool
 from deepagents import create_deep_agent
 from deepagents.backends.utils import create_file_data
 from langgraph.checkpoint.memory import MemorySaver
@@ -78,6 +80,13 @@ def get_mcp_config():
     }
 
 
+@tool
+def get_current_date() -> str:
+    """Returns the current date and time. Use this when you need to know today's date, calculate deadlines, or answer time-related questions."""
+    now = datetime.now()
+    return now.strftime("%Y-%m-%d %H:%M:%S (%A)")
+
+
 SKILLS_DIR = Path(__file__).parent.parent / "skills"
 
 
@@ -104,7 +113,7 @@ async def create_crm_agent():
     checkpointer = MemorySaver()
     agent = create_deep_agent(
         model="openai:gpt-4o",
-        tools=mcp_tools,
+        tools=mcp_tools + [get_current_date],
         system_prompt=SYSTEM_PROMPT,
         skills=["/skills/"],
         checkpointer=checkpointer,
