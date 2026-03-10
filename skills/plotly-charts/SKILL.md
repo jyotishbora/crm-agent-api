@@ -28,15 +28,18 @@ Activate this skill when the user asks to:
 
 ### How to return the chart
 
-Return the Plotly chart as a JSON object inside a fenced code block with the language tag `plotly`. The frontend will detect this and render it.
+CRITICAL: You MUST include the Plotly JSON directly in your response message text. Do NOT write it to a file. Do NOT just describe the chart. You MUST output the actual JSON wrapped in a ```plotly fenced code block in your message. The frontend parses your message text for this block and renders it as an interactive chart.
 
-Format:
+Your response MUST contain this exact format (with real data filled in):
+
 ```plotly
 {
   "data": [...],
   "layout": {...}
 }
 ```
+
+If your response does not contain a ```plotly code block, NO chart will be shown to the user.
 
 ### Chart type guidelines
 

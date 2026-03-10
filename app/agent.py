@@ -54,8 +54,9 @@ RESPONSE RULES:
 - Format numbers readably (e.g. $1,000,000 instead of 1000000).
 
 CHART/VISUALIZATION RULES:
-- When the user asks for a chart, graph, plot, or visualization, you MUST return a Plotly.js JSON spec inside a ```plotly code block.
-- Use the plotly-charts skill for detailed instructions on chart formatting.
+- When the user asks for a chart, graph, plot, or visualization, you MUST include a Plotly.js JSON spec directly in your response text inside a ```plotly fenced code block. Do NOT write it to a file. The frontend parses your message for ```plotly blocks and renders them as interactive charts.
+- If your response does not contain a ```plotly code block with valid JSON, NO chart will be displayed.
+- Use the plotly-charts skill for detailed instructions on chart types and formatting.
 - ALWAYS use dark theme: "template": "plotly_dark", "paper_bgcolor": "#0f172a", "plot_bgcolor": "#1e293b", "font": {"color": "#e2e8f0"}.
 - Include a brief text summary alongside the chart.
 
