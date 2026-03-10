@@ -1,7 +1,9 @@
 import os
 import logging
+from pathlib import Path
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from deepagents import create_deep_agent
+from deepagents.backends.utils import create_file_data
 from langgraph.checkpoint.memory import MemorySaver
 
 logger = logging.getLogger(__name__)
@@ -76,15 +78,35 @@ def get_mcp_config():
     }
 
 
+SKILLS_DIR = Path(__file__).parent.parent / "skills"
+
+
+def load_skills_files():
+    """Load all SKILL.md files into a virtual file dict for StateBackend."""
+    files = {}
+    if SKILLS_DIR.exists():
+        for skill_dir in SKILLS_DIR.iterdir():
+            if skill_dir.is_dir():
+                skill_md = skill_dir / "SKILL.md"
+                if skill_md.exists():
+                    content = skill_md.read_text()
+                    virtual_path = f"/skills/{skill_dir.name}/SKILL.md"
+                    files[virtual_path] = create_file_data(content)
+                    logger.info(f"Loaded skill: {skill_dir.name}")
+    return files
+
+
 async def create_crm_agent():
     client = MultiServerMCPClient(get_mcp_config())
     mcp_tools = await client.get_tools()
     logger.info(f"Loaded {len(mcp_tools)} MCP tools: {[t.name for t in mcp_tools]}")
+    skills_files = load_skills_files()
     checkpointer = MemorySaver()
     agent = create_deep_agent(
         model="openai:gpt-4o",
         tools=mcp_tools,
         system_prompt=SYSTEM_PROMPT,
+        skills=["/skills/"],
         checkpointer=checkpointer,
     )
-    return agent
+    return agent, skills_files

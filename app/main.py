@@ -18,12 +18,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 crm_agent = None
+skills_files = {}
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global crm_agent
-    crm_agent = await create_crm_agent()
+    global crm_agent, skills_files
+    crm_agent, skills_files = await create_crm_agent()
     yield
 
 
@@ -85,7 +86,7 @@ async def ask(request: QuestionRequest):
 async def chat(request: ChatRequest):
     config = {"configurable": {"thread_id": request.thread_id}}
     result = await crm_agent.ainvoke(
-        {"messages": [HumanMessage(content=request.message)]},
+        {"messages": [HumanMessage(content=request.message)], "files": skills_files},
         config=config,
     )
     # Log tool calls and responses for debugging
@@ -110,7 +111,7 @@ async def chat_stream(request: ChatRequest):
 
     async def event_generator():
         async for event in crm_agent.astream_events(
-            {"messages": [HumanMessage(content=request.message)]},
+            {"messages": [HumanMessage(content=request.message)], "files": skills_files},
             config=config,
             version="v2",
         ):

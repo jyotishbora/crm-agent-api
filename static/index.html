@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM Agent</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -173,6 +174,19 @@
         #send-btn:hover { background: #2563eb; }
         #send-btn:disabled { background: #475569; cursor: not-allowed; }
 
+        .chart-container {
+            width: 100%;
+            min-height: 350px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .message.assistant.has-chart {
+            max-width: 90%;
+            white-space: normal;
+        }
+
         #chat-messages::-webkit-scrollbar { width: 6px; }
         #chat-messages::-webkit-scrollbar-track { background: transparent; }
         #chat-messages::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -209,6 +223,56 @@
         const newChatBtn = document.getElementById('new-chat');
 
         let threadId = crypto.randomUUID();
+
+        function renderPlotlyCharts(el) {
+            const text = el.textContent;
+            const plotlyRegex = /```plotly\s*\n([\s\S]*?)```/g;
+            let match;
+            const parts = [];
+            let lastIndex = 0;
+
+            while ((match = plotlyRegex.exec(text)) !== null) {
+                if (match.index > lastIndex) {
+                    parts.push({ type: 'text', content: text.slice(lastIndex, match.index) });
+                }
+                parts.push({ type: 'plotly', content: match[1].trim() });
+                lastIndex = plotlyRegex.lastIndex;
+            }
+
+            if (parts.length === 0) return;
+
+            if (lastIndex < text.length) {
+                parts.push({ type: 'text', content: text.slice(lastIndex) });
+            }
+
+            el.textContent = '';
+            el.classList.add('has-chart');
+
+            parts.forEach(part => {
+                if (part.type === 'text') {
+                    const span = document.createElement('span');
+                    span.style.whiteSpace = 'pre-wrap';
+                    span.textContent = part.content;
+                    el.appendChild(span);
+                } else {
+                    try {
+                        const spec = JSON.parse(part.content);
+                        const chartDiv = document.createElement('div');
+                        chartDiv.className = 'chart-container';
+                        el.appendChild(chartDiv);
+                        const layout = spec.layout || {};
+                        layout.autosize = true;
+                        layout.margin = layout.margin || { l: 50, r: 30, t: 50, b: 50 };
+                        Plotly.newPlot(chartDiv, spec.data, layout, { responsive: true, displayModeBar: false });
+                    } catch (e) {
+                        const pre = document.createElement('pre');
+                        pre.textContent = part.content;
+                        el.appendChild(pre);
+                    }
+                }
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
         function addMessage(text, role) {
             const div = document.createElement('div');
@@ -320,6 +384,8 @@
                 if (toolStatusEl) toolStatusEl.remove();
                 if (!responseDiv) {
                     addMessage('No response received.', 'assistant');
+                } else {
+                    renderPlotlyCharts(responseDiv);
                 }
             } catch (err) {
                 if (thinkingEl.parentNode) thinkingEl.remove();
