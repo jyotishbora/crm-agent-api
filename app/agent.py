@@ -119,7 +119,7 @@ async def create_crm_agent():
     skills_files = load_skills_files()
     checkpointer = MemorySaver()
     agent = create_deep_agent(
-        model="openai:gpt-5.2",
+        model="openai:gpt-5.4",
         tools=mcp_tools + [get_current_date],
         system_prompt=SYSTEM_PROMPT,
         skills=["/skills/"],
